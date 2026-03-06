@@ -1,0 +1,6 @@
+{
+  "appId": "com.voip.hdhd",
+  "appName": "VoIP Test App",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
