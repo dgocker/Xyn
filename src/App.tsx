@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { ForegroundService } from '@capawesome-team/capacitor-android-foreground-service';
 import { CallKitVoip } from '@techrover_solutions/capacitor-callkit-voip';
@@ -19,6 +20,7 @@ declare global {
 
 export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
+  const isNative = Capacitor.isNativePlatform();
 
   const addLog = (msg: string) => {
     const newLog = `${new Date().toLocaleTimeString()}: ${msg}`;
@@ -30,21 +32,29 @@ export default function App() {
     const savedLogs = localStorage.getItem('logs');
     if (savedLogs) setLogs(JSON.parse(savedLogs));
 
-    // Initialize plugins
-    PushNotifications.register();
-    PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      addLog(`Push received: ${JSON.stringify(notification.data)}`);
-      if (notification.data.type === 'test_call') {
-        simulateAll();
-      }
-    });
+    if (isNative) {
+      // Initialize plugins
+      PushNotifications.register();
+      PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        addLog(`Push received: ${JSON.stringify(notification.data)}`);
+        if (notification.data.type === 'test_call') {
+          simulateAll();
+        }
+      });
 
-    window.cordova?.plugins?.backgroundMode?.enable();
-    KeepAwake.keepAwake().catch(e => addLog(`KeepAwake error: ${e}`));
-    addLog('App initialized');
+      window.cordova?.plugins?.backgroundMode?.enable();
+      KeepAwake.keepAwake().catch(e => addLog(`KeepAwake error: ${e}`));
+      addLog('App initialized on native');
+    } else {
+      addLog('App initialized on web (native plugins disabled)');
+    }
   }, []);
 
   const simulateAll = () => {
+    if (!isNative) {
+      addLog('Simulation skipped: not on native platform');
+      return;
+    }
     addLog('Simulating all calls...');
     // Foreground Service
     ForegroundService.startForegroundService({
@@ -67,7 +77,7 @@ export default function App() {
       <h1 className="text-2xl font-bold mb-4">VoIP Test Dashboard</h1>
       <div className="space-y-2 mb-4">
         <button onClick={simulateAll} className="bg-blue-600 p-2 rounded w-full">Simulate All</button>
-        <button onClick={() => NativeSettings.openAndroid({ option: AndroidSettings.BatteryOptimization })} className="bg-zinc-700 p-2 rounded w-full">Request Battery Exemption</button>
+        <button onClick={() => isNative ? NativeSettings.openAndroid({ option: AndroidSettings.BatteryOptimization }) : addLog('Not on Android')} className="bg-zinc-700 p-2 rounded w-full">Request Battery Exemption</button>
       </div>
       <div className="bg-zinc-800 p-4 rounded h-64 overflow-y-auto font-mono text-xs">
         {logs.map((log, i) => <div key={i}>{log}</div>)}
