@@ -1,0 +1,5 @@
+{
+  "name": "Android VoIP Test App",
+  "description": "A React + Vite + Capacitor application to test Android VoIP call reception strategies.",
+  "requestFramePermissions": []
+}
