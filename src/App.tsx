@@ -7,9 +7,15 @@ import { useEffect, useState } from 'react';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { ForegroundService } from '@capawesome-team/capacitor-android-foreground-service';
 import { CallKitVoip } from '@techrover_solutions/capacitor-callkit-voip';
-import { BackgroundMode } from 'cordova-plugin-background-mode';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { NativeSettings, AndroidSettings } from 'capacitor-native-settings';
+
+// Declare window for Cordova plugin access
+declare global {
+  interface Window {
+    cordova: any;
+  }
+}
 
 export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -33,7 +39,7 @@ export default function App() {
       }
     });
 
-    BackgroundMode.enable();
+    window.cordova?.plugins?.backgroundMode?.enable();
     KeepAwake.keepAwake().catch(e => addLog(`KeepAwake error: ${e}`));
     addLog('App initialized');
   }, []);
@@ -49,7 +55,7 @@ export default function App() {
     }).then(() => addLog('Foreground Service started')).catch(e => addLog(`Foreground Service error: ${e}`));
 
     // CallKit
-    CallKitVoip.displayIncomingCall({
+    (CallKitVoip as any).displayIncomingCall({
       id: '123',
       name: 'Test Caller',
       handle: '1234567890'

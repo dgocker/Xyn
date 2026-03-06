@@ -24,7 +24,6 @@
     "@vitejs/plugin-react": "^5.0.4",
     "better-sqlite3": "^12.4.1",
     "capacitor-native-settings": "^8.0.0",
-    "cordova-plugin-background-mode": "^0.7.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "firebase-admin": "^13.7.0",
